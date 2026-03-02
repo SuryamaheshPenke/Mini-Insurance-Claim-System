@@ -12,7 +12,7 @@ function getClaimStatus(amount, fraud_score) {
 
 router.post("/", (req, res) => {
   const { claim_id, customer_name, amount, fraud_score } = req.body;
-
+    const nameRegex = /^[A-Za-z\s]+$/;
   
   if (!claim_id || !customer_name || amount == null || fraud_score == null) {
     return res.status(400).json({ error: "All fields are required" });
@@ -20,6 +20,18 @@ router.post("/", (req, res) => {
   if (typeof customer_name !== "string") {
   return res.status(400).json({ error: "Customer name must be a string" });
 }
+
+
+if (!nameRegex.test(customer_name)) {
+  return res.status(400).json({
+    error: "Customer name must contain only alphabets",
+  });
+}
+if (fraud_score < 0 || fraud_score > 1) {
+    return res.status(400).json({
+      error: "Fraud score must be between 0 and 1"
+    });
+  }
 
   const status = getClaimStatus(amount, fraud_score);
 
@@ -52,12 +64,6 @@ router.get("/", (req, res) => {
     res.json(rows);
   });
 });
-const nameRegex = /^[A-Za-z\s]+$/;
 
-if (!nameRegex.test(customer_name)) {
-  return res.status(400).json({
-    error: "Customer name must contain only alphabets",
-  });
-}
 
 module.exports = router;
